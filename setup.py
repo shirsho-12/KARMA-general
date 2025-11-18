@@ -7,15 +7,19 @@ import pathlib
 here = pathlib.Path(__file__).parent.resolve()
 long_description = (here / "README.md").read_text(encoding="utf-8")
 
+
 # Read version from the package
 def get_version():
     import sys
+
     sys.path.insert(0, str(here / "karma"))
     try:
         from karma import __version__
+
         return __version__
     except ImportError:
         return "1.0.0"
+
 
 setup(
     name="karma-nlp",
@@ -68,16 +72,11 @@ setup(
             "matplotlib>=3.5.0",
             "pandas>=1.4.0",
             "jupyter>=1.0.0",
-        ]
-    },
-    entry_points={
-        "console_scripts": [
-            "karma=karma.cli:main",
         ],
     },
     project_urls={
-        "Bug Reports": "https://github.com/YuxingLu613/KARMA/issues",
-        "Source": "https://github.com/YuxingLu613/KARMA",
+        "Bug Reports": "https://github.com/shirsho-12/KARMA-general/issues",
+        "Source": "https://github.com/shirsho-12/KARMA-general",
         "Documentation": "https://karma-nlp.readthedocs.io/",
     },
     include_package_data=True,

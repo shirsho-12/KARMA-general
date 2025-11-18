@@ -10,6 +10,9 @@ import logging
 from dataclasses import dataclass, field, asdict
 from typing import Dict, Optional, Union
 from pathlib import Path
+import dotenv
+
+dotenv.load_dotenv()
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +20,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ModelConfig:
     """Configuration for LLM model settings."""
+
     name: str = "gpt-4o"
     api_key: str = ""
     base_url: Optional[str] = None
@@ -28,6 +32,7 @@ class ModelConfig:
 @dataclass
 class PipelineConfig:
     """Configuration for pipeline processing parameters."""
+
     relevance_threshold: float = 0.2
     integration_threshold: float = 0.6
     batch_size: int = 5
@@ -40,6 +45,7 @@ class PipelineConfig:
 @dataclass
 class AgentConfig:
     """Configuration for individual agent settings."""
+
     ingestion: Dict = field(default_factory=lambda: {"extract_metadata": True})
     reader: Dict = field(default_factory=lambda: {"segment_min_length": 30})
     summarizer: Dict = field(default_factory=lambda: {"max_summary_length": 100})
@@ -47,12 +53,19 @@ class AgentConfig:
     relationship_extraction: Dict = field(default_factory=lambda: {"min_confidence": 0.3})
     schema_alignment: Dict = field(default_factory=lambda: {"use_ontology_mapping": True})
     conflict_resolution: Dict = field(default_factory=lambda: {"resolution_strategy": "confidence"})
-    evaluator: Dict = field(default_factory=lambda: {"confidence_weight": 0.5, "clarity_weight": 0.25, "relevance_weight": 0.25})
+    evaluator: Dict = field(
+        default_factory=lambda: {
+            "confidence_weight": 0.5,
+            "clarity_weight": 0.25,
+            "relevance_weight": 0.25,
+        }
+    )
 
 
 @dataclass
 class LoggingConfig:
     """Configuration for logging settings."""
+
     level: str = "INFO"
     format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     file_path: Optional[str] = None
@@ -63,6 +76,7 @@ class LoggingConfig:
 @dataclass
 class KARMAConfig:
     """Main configuration class for KARMA framework."""
+
     model: ModelConfig = field(default_factory=ModelConfig)
     pipeline: PipelineConfig = field(default_factory=PipelineConfig)
     agents: AgentConfig = field(default_factory=AgentConfig)
@@ -82,33 +96,33 @@ class KARMAConfig:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: Dict) -> 'KARMAConfig':
+    def from_dict(cls, data: Dict) -> "KARMAConfig":
         """Create configuration from dictionary."""
         config = cls()
 
         # Update model config
-        if 'model' in data:
-            model_data = data['model']
+        if "model" in data:
+            model_data = data["model"]
             config.model = ModelConfig(**model_data)
 
         # Update pipeline config
-        if 'pipeline' in data:
-            pipeline_data = data['pipeline']
+        if "pipeline" in data:
+            pipeline_data = data["pipeline"]
             config.pipeline = PipelineConfig(**pipeline_data)
 
         # Update agent config
-        if 'agents' in data:
-            agents_data = data['agents']
+        if "agents" in data:
+            agents_data = data["agents"]
             config.agents = AgentConfig(**agents_data)
 
         # Update logging config
-        if 'logging' in data:
-            logging_data = data['logging']
+        if "logging" in data:
+            logging_data = data["logging"]
             config.logging = LoggingConfig(**logging_data)
 
         # Update other fields
         for key, value in data.items():
-            if key not in ['model', 'pipeline', 'agents', 'logging'] and hasattr(config, key):
+            if key not in ["model", "pipeline", "agents", "logging"] and hasattr(config, key):
                 setattr(config, key, value)
 
         return config
@@ -168,10 +182,11 @@ class KARMAConfig:
         if self.logging.file_path:
             try:
                 from logging.handlers import RotatingFileHandler
+
                 file_handler = RotatingFileHandler(
                     self.logging.file_path,
                     maxBytes=self.logging.max_file_size,
-                    backupCount=self.logging.backup_count
+                    backupCount=self.logging.backup_count,
                 )
                 file_handler.setLevel(logging_level)
                 file_formatter = logging.Formatter(self.logging.format)
@@ -182,10 +197,7 @@ class KARMAConfig:
 
         # Configure root logger
         logging.basicConfig(
-            level=logging_level,
-            format=self.logging.format,
-            handlers=handlers,
-            force=True
+            level=logging_level, format=self.logging.format, handlers=handlers, force=True
         )
 
         # Set specific logger levels
@@ -213,8 +225,8 @@ def load_config(config_path: Union[str, Path]) -> KARMAConfig:
         raise FileNotFoundError(f"Configuration file not found: {config_path}")
 
     try:
-        with open(config_path, 'r', encoding='utf-8') as f:
-            if config_path.suffix.lower() == '.json':
+        with open(config_path, "r", encoding="utf-8") as f:
+            if config_path.suffix.lower() == ".json":
                 data = json.load(f)
             else:
                 # Try to parse as JSON anyway
@@ -244,7 +256,7 @@ def save_config(config: KARMAConfig, config_path: Union[str, Path]):
     config_path.parent.mkdir(parents=True, exist_ok=True)
 
     try:
-        with open(config_path, 'w', encoding='utf-8') as f:
+        with open(config_path, "w", encoding="utf-8") as f:
             json.dump(config.to_dict(), f, indent=2, ensure_ascii=False)
 
         logger.info(f"Configuration saved to {config_path}")
@@ -254,7 +266,9 @@ def save_config(config: KARMAConfig, config_path: Union[str, Path]):
         raise
 
 
-def create_default_config(api_key: str, output_dir: str = "output") -> KARMAConfig:
+def create_default_config(
+    api_key: str, base_url: str = "", output_dir: str = "output"
+) -> KARMAConfig:
     """
     Create a default configuration with the provided API key.
 
@@ -267,6 +281,8 @@ def create_default_config(api_key: str, output_dir: str = "output") -> KARMAConf
     """
     config = KARMAConfig()
     config.model.api_key = api_key
+    if base_url:
+        config.model.base_url = base_url
     config.output_dir = output_dir
 
     return config
@@ -284,21 +300,21 @@ def get_environment_config() -> KARMAConfig:
     config = KARMAConfig()
 
     # Model configuration from environment
-    if os.getenv('KARMA_API_KEY'):
-        config.model.api_key = os.getenv('KARMA_API_KEY')
-    if os.getenv('KARMA_BASE_URL'):
-        config.model.base_url = os.getenv('KARMA_BASE_URL')
-    if os.getenv('KARMA_MODEL'):
-        config.model.name = os.getenv('KARMA_MODEL')
+    if os.getenv("KARMA_API_KEY"):
+        config.model.api_key = os.getenv("KARMA_API_KEY")
+    if os.getenv("KARMA_BASE_URL"):
+        config.model.base_url = os.getenv("KARMA_BASE_URL")
+    if os.getenv("KARMA_MODEL"):
+        config.model.name = os.getenv("KARMA_MODEL")
 
     # Pipeline configuration from environment
-    if os.getenv('KARMA_RELEVANCE_THRESHOLD'):
-        config.pipeline.relevance_threshold = float(os.getenv('KARMA_RELEVANCE_THRESHOLD'))
-    if os.getenv('KARMA_INTEGRATION_THRESHOLD'):
-        config.pipeline.integration_threshold = float(os.getenv('KARMA_INTEGRATION_THRESHOLD'))
+    if os.getenv("KARMA_RELEVANCE_THRESHOLD"):
+        config.pipeline.relevance_threshold = float(os.getenv("KARMA_RELEVANCE_THRESHOLD"))
+    if os.getenv("KARMA_INTEGRATION_THRESHOLD"):
+        config.pipeline.integration_threshold = float(os.getenv("KARMA_INTEGRATION_THRESHOLD"))
 
     # Output configuration from environment
-    if os.getenv('KARMA_OUTPUT_DIR'):
-        config.output_dir = os.getenv('KARMA_OUTPUT_DIR')
+    if os.getenv("KARMA_OUTPUT_DIR"):
+        config.output_dir = os.getenv("KARMA_OUTPUT_DIR")
 
     return config

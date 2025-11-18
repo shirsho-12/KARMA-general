@@ -32,7 +32,7 @@ from .core.data_structures import (
     IntermediateOutput,
     KnowledgeGraph,
     DocumentMetadata,
-    ProcessingMetrics
+    ProcessingMetrics,
 )
 
 # Configuration imports
@@ -47,33 +47,31 @@ from .agents import (
     RelationshipExtractionAgent,
     SchemaAlignmentAgent,
     ConflictResolutionAgent,
-    EvaluatorAgent
+    EvaluatorAgent,
 )
 
 __all__ = [
     # Core classes
-    'KARMAPipeline',
-    'KnowledgeTriple',
-    'KGEntity',
-    'IntermediateOutput',
-    'KnowledgeGraph',
-    'DocumentMetadata',
-    'ProcessingMetrics',
-
+    "KARMAPipeline",
+    "KnowledgeTriple",
+    "KGEntity",
+    "IntermediateOutput",
+    "KnowledgeGraph",
+    "DocumentMetadata",
+    "ProcessingMetrics",
     # Configuration
-    'KARMAConfig',
-    'load_config',
-    'save_config',
-
+    "KARMAConfig",
+    "load_config",
+    "save_config",
     # Agents (for advanced usage)
-    'IngestionAgent',
-    'ReaderAgent',
-    'SummarizerAgent',
-    'EntityExtractionAgent',
-    'RelationshipExtractionAgent',
-    'SchemaAlignmentAgent',
-    'ConflictResolutionAgent',
-    'EvaluatorAgent'
+    "IngestionAgent",
+    "ReaderAgent",
+    "SummarizerAgent",
+    "EntityExtractionAgent",
+    "RelationshipExtractionAgent",
+    "SchemaAlignmentAgent",
+    "ConflictResolutionAgent",
+    "EvaluatorAgent",
 ]
 
 
@@ -85,14 +83,19 @@ def get_version() -> str:
 def get_info() -> dict:
     """Get information about the KARMA package."""
     return {
-        'name': 'KARMA',
-        'version': __version__,
-        'author': __author__,
-        'email': __email__,
-        'description': 'Multi-Agent LLMs for Automated Knowledge Graph Enrichment',
-        'agents': [
-            'IngestionAgent', 'ReaderAgent', 'SummarizerAgent',
-            'EntityExtractionAgent', 'RelationshipExtractionAgent',
-            'SchemaAlignmentAgent', 'ConflictResolutionAgent', 'EvaluatorAgent'
-        ]
+        "name": "KARMA",
+        "version": __version__,
+        "author": __author__,
+        "email": __email__,
+        "description": "Multi-Agent LLMs for Automated Knowledge Graph Enrichment",
+        "agents": [
+            "IngestionAgent",
+            "ReaderAgent",
+            "SummarizerAgent",
+            "EntityExtractionAgent",
+            "RelationshipExtractionAgent",
+            "SchemaAlignmentAgent",
+            "ConflictResolutionAgent",
+            "EvaluatorAgent",
+        ],
     }

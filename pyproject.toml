@@ -64,8 +64,6 @@ all = [
 "Source" = "https://github.com/YuxingLu613/KARMA"
 "Documentation" = "https://karma-nlp.readthedocs.io/"
 
-[project.scripts]
-karma = "karma.cli:main"
 
 [tool.setuptools]
 packages = ["karma"]

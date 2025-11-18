@@ -155,3 +155,4 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.tempoutput/
+/karma_output/

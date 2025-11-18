@@ -12,22 +12,28 @@ import argparse
 import csv
 from pathlib import Path
 from datetime import datetime
-
-# Add the karma package to Python path
-sys.path.insert(0, '/Users/luyuxing/Projects/KARMA')
+import dotenv
 
 from karma import KARMAPipeline
 from karma.config import create_default_config
 
+dotenv.load_dotenv()
+
 
 def save_relationships_to_csv(result, csv_path, integration_threshold):
     """Save all extracted relationships to CSV with scores and pass/fail status."""
-    with open(csv_path, 'w', newline='', encoding='utf-8') as csvfile:
+    with open(csv_path, "w", newline="", encoding="utf-8") as csvfile:
         fieldnames = [
-            'head_entity', 'relation', 'tail_entity',
-            'confidence', 'clarity', 'relevance',
-            'integration_score', 'passed_integration',
-            'source_stage', 'processing_notes'
+            "head_entity",
+            "relation",
+            "tail_entity",
+            "confidence",
+            "clarity",
+            "relevance",
+            "integration_score",
+            "passed_integration",
+            "source_stage",
+            "processing_notes",
         ]
 
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -38,10 +44,10 @@ def save_relationships_to_csv(result, csv_path, integration_threshold):
 
         # Add relationships from each stage
         stages = [
-            ('relationships', 'initial_extraction'),
-            ('aligned_triples', 'after_alignment'),
-            ('final_triples', 'after_conflict_resolution'),
-            ('integrated_triples', 'integrated_final')
+            ("relationships", "initial_extraction"),
+            ("aligned_triples", "after_alignment"),
+            ("final_triples", "after_conflict_resolution"),
+            ("integrated_triples", "integrated_final"),
         ]
 
         for attr_name, stage_name in stages:
@@ -54,15 +60,18 @@ def save_relationships_to_csv(result, csv_path, integration_threshold):
         # Remove duplicates while preserving the latest stage
         unique_relationships = {}
         stage_priority = {
-            'initial_extraction': 1,
-            'after_alignment': 2,
-            'after_conflict_resolution': 3,
-            'integrated_final': 4
+            "initial_extraction": 1,
+            "after_alignment": 2,
+            "after_conflict_resolution": 3,
+            "integrated_final": 4,
         }
 
         for rel, stage in all_relationships:
             key = f"{rel.head.lower()}_{rel.relation.lower()}_{rel.tail.lower()}"
-            if key not in unique_relationships or stage_priority[stage] > stage_priority[unique_relationships[key][1]]:
+            if (
+                key not in unique_relationships
+                or stage_priority[stage] > stage_priority[unique_relationships[key][1]]
+            ):
                 unique_relationships[key] = (rel, stage)
 
         # Write relationships to CSV
@@ -70,27 +79,29 @@ def save_relationships_to_csv(result, csv_path, integration_threshold):
             integration_score = 0.5 * rel.confidence + 0.25 * rel.clarity + 0.25 * rel.relevance
             passed_integration = integration_score >= integration_threshold
 
-            if stage == 'integrated_final':
+            if stage == "integrated_final":
                 notes = "Successfully integrated into knowledge graph"
-            elif stage == 'after_conflict_resolution':
+            elif stage == "after_conflict_resolution":
                 notes = "Passed conflict resolution but failed final evaluation"
-            elif stage == 'after_alignment':
+            elif stage == "after_alignment":
                 notes = "Passed schema alignment but failed conflict resolution or evaluation"
             else:
                 notes = "Failed early in pipeline"
 
-            writer.writerow({
-                'head_entity': rel.head,
-                'relation': rel.relation,
-                'tail_entity': rel.tail,
-                'confidence': f"{rel.confidence:.3f}",
-                'clarity': f"{rel.clarity:.3f}",
-                'relevance': f"{rel.relevance:.3f}",
-                'integration_score': f"{integration_score:.3f}",
-                'passed_integration': 'YES' if passed_integration else 'NO',
-                'source_stage': stage,
-                'processing_notes': notes
-            })
+            writer.writerow(
+                {
+                    "head_entity": rel.head,
+                    "relation": rel.relation,
+                    "tail_entity": rel.tail,
+                    "confidence": f"{rel.confidence:.3f}",
+                    "clarity": f"{rel.clarity:.3f}",
+                    "relevance": f"{rel.relevance:.3f}",
+                    "integration_score": f"{integration_score:.3f}",
+                    "passed_integration": "YES" if passed_integration else "NO",
+                    "source_stage": stage,
+                    "processing_notes": notes,
+                }
+            )
 
     return len(unique_relationships)
 
@@ -113,19 +124,39 @@ Examples:
 
   # Specify output directory
   python main.py document.pdf --output-dir results/experiment1
-        """
+        """,
     )
 
-    parser.add_argument('input', help='Input document path (PDF or text file)')
-    parser.add_argument('--api-key',
-                       default=os.getenv('KARMA_API_KEY'),
-                       help='OpenAI API key (default: from KARMA_API_KEY env var)')
-    parser.add_argument('--model', default='gpt-4o-mini', help='Model to use (default: gpt-4o-mini)')
-    parser.add_argument('--relevance-threshold', type=float, default=0.2, help='Relevance threshold (default: 0.2)')
-    parser.add_argument('--integration-threshold', type=float, default=0.5, help='Integration threshold (default: 0.5)')
-    parser.add_argument('--output-dir', default='karma_output', help='Output directory (default: karma_output)')
-    parser.add_argument('--domain', default='biomedical', help='Domain context (default: biomedical)')
-    parser.add_argument('--verbose', '-v', action='store_true', help='Verbose output')
+    parser.add_argument("input", help="Input document path (PDF or text file)")
+    parser.add_argument(
+        "--api-key",
+        default=os.getenv("KARMA_API_KEY"),
+        help="OpenAI API key (default: from KARMA_API_KEY env var)",
+    )
+    parser.add_argument(
+        "--model", default="gpt-4o-mini", help="Model to use (default: gpt-4o-mini)"
+    )
+    parser.add_argument(
+        "--relevance-threshold", type=float, default=0.2, help="Relevance threshold (default: 0.2)"
+    )
+    parser.add_argument(
+        "--integration-threshold",
+        type=float,
+        default=0.5,
+        help="Integration threshold (default: 0.5)",
+    )
+    parser.add_argument(
+        "--output-dir", default="karma_output", help="Output directory (default: karma_output)"
+    )
+    parser.add_argument(
+        "--domain", default="biomedical", help="Domain context (default: biomedical)"
+    )
+    parser.add_argument(
+        "--base-url",
+        default=os.getenv("KARMA_BASE_URL"),
+        help="Base URL for the LLM API (optional)",
+    )
+    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose output")
 
     args = parser.parse_args()
 
@@ -136,7 +167,9 @@ Examples:
         return 1
 
     if not args.api_key:
-        print("❌ Error: API key is required. Set KARMA_API_KEY environment variable or use --api-key")
+        print(
+            "❌ Error: API key is required. Set KARMA_API_KEY environment variable or use --api-key"
+        )
         return 1
 
     # Setup output directory
@@ -155,7 +188,7 @@ Examples:
 
     try:
         # Create configuration
-        config = create_default_config(api_key=args.api_key)
+        config = create_default_config(api_key=args.api_key, base_url=args.base_url)
         config.model.name = args.model
         config.pipeline.relevance_threshold = args.relevance_threshold
         config.pipeline.integration_threshold = args.integration_threshold
@@ -169,9 +202,7 @@ Examples:
         print("⏳ This may take several minutes...")
 
         result = pipeline.process_document(
-            input_path,
-            domain=args.domain,
-            relevance_threshold=args.relevance_threshold
+            input_path, domain=args.domain, relevance_threshold=args.relevance_threshold
         )
 
         print("✅ Processing completed successfully!")
@@ -183,7 +214,9 @@ Examples:
         print(f"   ✨ Relevant segments: {len(result.relevant_segments)}")
         print(f"   📄 Summaries: {len(result.summaries)}")
         print(f"   🏷️  Entities extracted: {len(result.entities)}")
-        print(f"   🔗 Initial relationships: {len(result.relationships) if result.relationships else 0}")
+        print(
+            f"   🔗 Initial relationships: {len(result.relationships) if result.relationships else 0}"
+        )
         print(f"   ✅ Final integrated triples: {len(result.integrated_triples)}")
         print(f"   ⏱️  Total processing time: {result.metrics.processing_time:.2f} seconds")
 
@@ -222,15 +255,21 @@ Examples:
             for entity in result.entities:
                 entity_types[entity.entity_type] = entity_types.get(entity.entity_type, 0) + 1
 
-            for entity_type, count in sorted(entity_types.items(), key=lambda x: x[1], reverse=True)[:5]:
+            for entity_type, count in sorted(
+                entity_types.items(), key=lambda x: x[1], reverse=True
+            )[:5]:
                 print(f"   {entity_type}: {count}")
 
         if result.integrated_triples and args.verbose:
             print(f"\n🔗 TOP KNOWLEDGE TRIPLES:")
             for i, triple in enumerate(result.integrated_triples[:5], 1):
-                integration_score = 0.5 * triple.confidence + 0.25 * triple.clarity + 0.25 * triple.relevance
+                integration_score = (
+                    0.5 * triple.confidence + 0.25 * triple.clarity + 0.25 * triple.relevance
+                )
                 print(f"   {i}. {triple.head} --[{triple.relation}]--> {triple.tail}")
-                print(f"      Score: {integration_score:.3f} (C:{triple.confidence:.2f}, Cl:{triple.clarity:.2f}, R:{triple.relevance:.2f})")
+                print(
+                    f"      Score: {integration_score:.3f} (C:{triple.confidence:.2f}, Cl:{triple.clarity:.2f}, R:{triple.relevance:.2f})"
+                )
 
         print(f"\n🎉 KARMA processing completed successfully!")
         print(f"📁 All outputs saved to: {output_dir}")
@@ -240,6 +279,7 @@ Examples:
         print(f"❌ Error during processing: {str(e)}")
         if args.verbose:
             import traceback
+
             traceback.print_exc()
         return 1
 

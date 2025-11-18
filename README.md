@@ -11,20 +11,22 @@ KARMA is a cutting-edge natural language processing framework that leverages a c
 ## 🌟 Key Features
 
 ### Multi-Agent Architecture
+
 - **9 Specialized Agents**: Each agent handles a distinct stage of knowledge extraction
 - **Coordinated Processing**: Agents work together in a carefully orchestrated pipeline
 - **Quality Assurance**: Multi-stage validation with confidence, clarity, and relevance scoring
 
 ### Domain Expertise
+
 - **Biomedical Focus**: Optimized for scientific literature processing
 - **Entity Recognition**: Identifies diseases, drugs, genes, proteins, and other biomedical entities
 - **Relationship Extraction**: Captures complex relationships like "treats", "causes", "inhibits"
 - **Ontology Alignment**: Links entities to standard biomedical ontologies (UMLS, MeSH, NCBI)
 
 ### Production Ready
+
 - **Scalable Design**: Handles both single documents and large-scale batch processing
 - **Flexible Configuration**: Comprehensive configuration management system
-- **Professional CLI**: Command-line interface for easy integration
 - **Robust Error Handling**: Graceful handling of processing failures
 
 ## 📋 Table of Contents
@@ -123,36 +125,43 @@ KARMA employs a sophisticated multi-agent architecture where each agent speciali
 ### Pipeline Stages
 
 1. **Ingestion Agent (IA)** 📥
+
    - Retrieves and standardizes raw documents (PDF, HTML, text)
    - Extracts metadata (authors, journal, publication date)
    - Handles OCR artifacts and text normalization
 
 2. **Reader Agent (RA)** 📖
+
    - Segments documents into logical chunks
    - Scores segment relevance using domain knowledge
    - Filters non-relevant content (acknowledgments, references)
 
 3. **Summarizer Agent (SA)** 📝
+
    - Condenses relevant segments into concise summaries
    - Preserves technical details and entity relationships
    - Maintains quantitative data and statistical findings
 
 4. **Entity Extraction Agent (EEA)** 🔍
+
    - Identifies biomedical entities using few-shot learning
    - Classifies entity types (Drug, Disease, Gene, Protein, etc.)
    - Normalizes entities to canonical ontology forms
 
 5. **Relationship Extraction Agent (REA)** 🔗
+
    - Detects relationships between entity pairs
    - Handles multi-label classification for overlapping relations
    - Recognizes negation and conditional statements
 
 6. **Schema Alignment Agent (SAA)** 🎯
+
    - Maps entities to knowledge graph schema types
    - Standardizes relationship labels
    - Handles novel entities and relations
 
 7. **Conflict Resolution Agent (CRA)** ⚖️
+
    - Resolves contradictions between new and existing knowledge
    - Uses LLM-based debate and evidence aggregation
    - Maintains knowledge graph consistency
@@ -244,19 +253,21 @@ print(f"  Average Confidence: {stats['avg_confidence']:.2f}")
 KARMA generates comprehensive results including:
 
 ### Knowledge Triples
+
 ```json
 {
   "head": "Metformin",
   "relation": "treats",
   "tail": "Type 2 Diabetes",
   "confidence": 0.95,
-  "clarity": 0.90,
+  "clarity": 0.9,
   "relevance": 0.88,
   "source": "relationship_extraction"
 }
 ```
 
 ### Entities
+
 ```json
 {
   "entity_id": "metformin",
@@ -268,6 +279,7 @@ KARMA generates comprehensive results including:
 ```
 
 ### Processing Metrics
+
 ```json
 {
   "processing_time": 45.2,
@@ -333,6 +345,7 @@ export KARMA_OUTPUT_DIR="./output"
   - `typing-extensions>=4.0.0`: Type hints support
 
 ### Optional Dependencies
+
 - `spacy>=3.4.0`: Enhanced NLP processing
 - `networkx>=2.8.0`: Knowledge graph operations
 - `matplotlib>=3.5.0`: Visualization
@@ -378,6 +391,7 @@ pre-commit install
 ### Code Style
 
 We use:
+
 - **Black** for code formatting
 - **Flake8** for linting
 - **MyPy** for type checking

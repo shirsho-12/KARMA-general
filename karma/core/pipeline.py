@@ -14,14 +14,23 @@ from pathlib import Path
 from openai import OpenAI
 
 from .data_structures import (
-    KnowledgeTriple, KGEntity, IntermediateOutput,
-    DocumentMetadata, ProcessingMetrics, KnowledgeGraph
+    KnowledgeTriple,
+    KGEntity,
+    IntermediateOutput,
+    DocumentMetadata,
+    ProcessingMetrics,
+    KnowledgeGraph,
 )
 
 from ..agents import (
-    IngestionAgent, ReaderAgent, SummarizerAgent,
-    EntityExtractionAgent, RelationshipExtractionAgent,
-    SchemaAlignmentAgent, ConflictResolutionAgent, EvaluatorAgent
+    IngestionAgent,
+    ReaderAgent,
+    SummarizerAgent,
+    EntityExtractionAgent,
+    RelationshipExtractionAgent,
+    SchemaAlignmentAgent,
+    ConflictResolutionAgent,
+    EvaluatorAgent,
 )
 
 from karma.utils.pdf_reader import PDFReader
@@ -44,7 +53,7 @@ class KARMAPipeline:
         api_key: str,
         base_url: Optional[str] = None,
         model_name: str = "gpt-4o",
-        integration_threshold: float = 0.6
+        integration_threshold: float = 0.6,
     ):
         """
         Initialize KARMA pipeline with API credentials.
@@ -75,7 +84,7 @@ class KARMAPipeline:
         self.output_log: List[str] = []
 
     @classmethod
-    def from_config(cls, config) -> 'KARMAPipeline':
+    def from_config(cls, config) -> "KARMAPipeline":
         """
         Create pipeline from configuration object.
 
@@ -94,7 +103,7 @@ class KARMAPipeline:
             api_key=config.model.api_key,
             base_url=config.model.base_url,
             model_name=config.model.name,
-            integration_threshold=config.pipeline.integration_threshold
+            integration_threshold=config.pipeline.integration_threshold,
         )
 
         return pipeline
@@ -105,19 +114,17 @@ class KARMAPipeline:
         self.reader_agent = ReaderAgent(self.client, self.model_name)
         self.summarizer_agent = SummarizerAgent(self.client, self.model_name)
         self.entity_extraction_agent = EntityExtractionAgent(self.client, self.model_name)
-        self.relationship_extraction_agent = RelationshipExtractionAgent(self.client, self.model_name)
+        self.relationship_extraction_agent = RelationshipExtractionAgent(
+            self.client, self.model_name
+        )
         self.schema_alignment_agent = SchemaAlignmentAgent(self.client, self.model_name)
         self.conflict_resolution_agent = ConflictResolutionAgent(self.client, self.model_name)
         self.evaluator_agent = EvaluatorAgent(
-            self.client, self.model_name,
-            integrate_threshold=self.integration_threshold
+            self.client, self.model_name, integrate_threshold=self.integration_threshold
         )
 
     def process_document(
-        self,
-        source: Union[str, Path],
-        domain: str = "biomedical",
-        relevance_threshold: float = 0.2
+        self, source: Union[str, Path], domain: str = "biomedical", relevance_threshold: float = 0.2
     ) -> IntermediateOutput:
         """
         Process a document and extract knowledge.
@@ -163,8 +170,10 @@ class KARMAPipeline:
 
             step_time = time.time() - step_start
             intermediate.metrics.add_agent_time("reader", step_time)
-            self._log(f"[2/8] Reader completed in {step_time:.2f}s. "
-                     f"Segments: {len(all_segments)}, Relevant: {len(relevant_segments)}")
+            self._log(
+                f"[2/8] Reader completed in {step_time:.2f}s. "
+                f"Segments: {len(all_segments)}, Relevant: {len(relevant_segments)}"
+            )
 
             # Step 4: Summarizer - Create concise summaries
             self._log("[3/8] Running Summarizer Agent...")
@@ -175,8 +184,9 @@ class KARMAPipeline:
 
             step_time = time.time() - step_start
             intermediate.metrics.add_agent_time("summarizer", step_time)
-            self._log(f"[3/8] Summarizer completed in {step_time:.2f}s. "
-                     f"Summaries: {len(summaries)}")
+            self._log(
+                f"[3/8] Summarizer completed in {step_time:.2f}s. " f"Summaries: {len(summaries)}"
+            )
 
             # Step 5: Entity Extraction - Identify entities
             self._log("[4/8] Running Entity Extraction Agent...")
@@ -187,8 +197,10 @@ class KARMAPipeline:
 
             step_time = time.time() - step_start
             intermediate.metrics.add_agent_time("entity_extraction", step_time)
-            self._log(f"[4/8] Entity extraction completed in {step_time:.2f}s. "
-                     f"Entities: {len(entities)}")
+            self._log(
+                f"[4/8] Entity extraction completed in {step_time:.2f}s. "
+                f"Entities: {len(entities)}"
+            )
 
             # Step 6: Relationship Extraction - Find relationships
             self._log("[5/8] Running Relationship Extraction Agent...")
@@ -199,8 +211,10 @@ class KARMAPipeline:
 
             step_time = time.time() - step_start
             intermediate.metrics.add_agent_time("relationship_extraction", step_time)
-            self._log(f"[5/8] Relationship extraction completed in {step_time:.2f}s. "
-                     f"Relationships: {len(relationships)}")
+            self._log(
+                f"[5/8] Relationship extraction completed in {step_time:.2f}s. "
+                f"Relationships: {len(relationships)}"
+            )
 
             # Step 7: Schema Alignment - Align to standard schema
             self._log("[6/8] Running Schema Alignment Agent...")
@@ -227,8 +241,10 @@ class KARMAPipeline:
 
             step_time = time.time() - step_start
             intermediate.metrics.add_agent_time("conflict_resolution", step_time)
-            self._log(f"[7/8] Conflict resolution completed in {step_time:.2f}s. "
-                     f"Non-conflicting: {len(resolved_relationships)}")
+            self._log(
+                f"[7/8] Conflict resolution completed in {step_time:.2f}s. "
+                f"Non-conflicting: {len(resolved_relationships)}"
+            )
 
             # Step 9: Evaluation - Final quality assessment
             self._log("[8/8] Running Evaluator Agent...")
@@ -239,8 +255,10 @@ class KARMAPipeline:
 
             step_time = time.time() - step_start
             intermediate.metrics.add_agent_time("evaluator", step_time)
-            self._log(f"[8/8] Evaluation completed in {step_time:.2f}s. "
-                     f"Integrated: {len(integrated_triples)}")
+            self._log(
+                f"[8/8] Evaluation completed in {step_time:.2f}s. "
+                f"Integrated: {len(integrated_triples)}"
+            )
 
             # Step 10: Update Knowledge Graph
             self._update_knowledge_graph(aligned_entities, integrated_triples)
@@ -249,8 +267,10 @@ class KARMAPipeline:
             total_time = time.time() - start_time
             intermediate.metrics.processing_time = total_time
 
-            self._log(f"KARMA pipeline completed in {total_time:.2f}s. "
-                     f"Added {len(integrated_triples)} knowledge triples.")
+            self._log(
+                f"KARMA pipeline completed in {total_time:.2f}s. "
+                f"Added {len(integrated_triples)} knowledge triples."
+            )
 
             return intermediate
 
@@ -274,11 +294,11 @@ class KARMAPipeline:
 
             # Check if it's a file path
             if source_path.exists():
-                if source_path.suffix.lower() == '.pdf':
+                if source_path.suffix.lower() == ".pdf":
                     return self.pdf_reader.extract_text(source_path)
                 else:
                     # Assume text file
-                    with open(source_path, 'r', encoding='utf-8') as f:
+                    with open(source_path, "r", encoding="utf-8") as f:
                         return f.read()
             else:
                 # Treat as raw text if not a valid file path
@@ -346,25 +366,22 @@ class KARMAPipeline:
         Returns:
             Dictionary of statistics
         """
-        stats = {
-            'knowledge_graph': self.knowledge_graph.get_statistics(),
-            'agents': {}
-        }
+        stats = {"knowledge_graph": self.knowledge_graph.get_statistics(), "agents": {}}
 
         # Get agent-specific metrics
         agents = [
-            ('ingestion', self.ingestion_agent),
-            ('reader', self.reader_agent),
-            ('summarizer', self.summarizer_agent),
-            ('entity_extraction', self.entity_extraction_agent),
-            ('relationship_extraction', self.relationship_extraction_agent),
-            ('schema_alignment', self.schema_alignment_agent),
-            ('conflict_resolution', self.conflict_resolution_agent),
-            ('evaluator', self.evaluator_agent)
+            ("ingestion", self.ingestion_agent),
+            ("reader", self.reader_agent),
+            ("summarizer", self.summarizer_agent),
+            ("entity_extraction", self.entity_extraction_agent),
+            ("relationship_extraction", self.relationship_extraction_agent),
+            ("schema_alignment", self.schema_alignment_agent),
+            ("conflict_resolution", self.conflict_resolution_agent),
+            ("evaluator", self.evaluator_agent),
         ]
 
         for name, agent in agents:
-            stats['agents'][name] = agent.get_metrics()
+            stats["agents"][name] = agent.get_metrics()
 
         return stats
 
@@ -372,7 +389,7 @@ class KARMAPipeline:
         self,
         sources: List[Union[str, Path]],
         domain: str = "biomedical",
-        relevance_threshold: float = 0.2
+        relevance_threshold: float = 0.2,
     ) -> List[IntermediateOutput]:
         """
         Process multiple documents in batch.
